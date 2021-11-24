@@ -191,6 +191,17 @@ class PurchaseOrderControllerTest {
         assertEquals(HttpStatus.OK.value(), response.getStatus());
     }
 
+    @Test
+    void deleteControllerTest() throws Exception {
+        final List<PurchaseOrder> purchaseOrderList = purchaseOrderRepository.findAll();
+        MockHttpServletResponse response = mockMvc.perform(delete("http://localhost:8080/api/v1/fresh-products/order/")
+                .param("id", purchaseOrderList.get(0).getId())
+                .header("Authorization", "Bearer " + tokenTest.getAccessToken())
+                .contentType("application/json"))
+                .andReturn().getResponse();
+
+        assertEquals(HttpStatus.OK.value(), response.getStatus());
+    }
 
     void clearBase() {
         purchaseOrderRepository.deleteAll();
