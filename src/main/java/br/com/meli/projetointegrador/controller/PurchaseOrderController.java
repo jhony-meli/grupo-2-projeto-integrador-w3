@@ -69,7 +69,7 @@ public class PurchaseOrderController {
 
     /**
      * @param id, ordem de compra;
-     * @return uma purchase ordder da alteracao;
+     * @return ResponseEntity.ok com a mensagem;
      * Requisito 06 - Desenvolvimento individual do integrante Jhony Zuim.
      */
     @DeleteMapping(value = "/order{id}", produces = "application/json")

@@ -138,6 +138,11 @@ public class PurchaseOrderService {
         return productList;
     }
 
+    /**
+     * Metodo especifico para atender o o Requisito 06 do Jhony Zuim;
+     * @param id, recebe o ID de uma purchaseOrder;
+     * Nao tem retorno.
+     */
     public void deleta(String id) {
         if (id.length() != 24){
             throw new PurchaseOrderException("ID incorreto, o ID deve conter 24 caracteres!");
