@@ -1,6 +1,7 @@
 package br.com.meli.projetointegrador.model.service;
 
 import Utils.ConstantsUtil;
+import br.com.meli.projetointegrador.exception.InboundOrderException;
 import br.com.meli.projetointegrador.exception.PersistenceException;
 import br.com.meli.projetointegrador.exception.PurchaseOrderException;
 import br.com.meli.projetointegrador.model.dto.ProductDTO;
@@ -10,6 +11,7 @@ import br.com.meli.projetointegrador.model.entity.Product;
 import br.com.meli.projetointegrador.model.entity.PurchaseOrder;
 import br.com.meli.projetointegrador.model.enums.EOrderStatus;
 import br.com.meli.projetointegrador.model.repository.PurchaseOrderRepository;
+import org.bson.types.ObjectId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataAccessException;
@@ -136,9 +138,14 @@ public class PurchaseOrderService {
         return productList;
     }
 
-    public BigDecimal delete(PurchaseOrderDTO purchaseOrderDTO) {
-        PurchaseOrder purchaseOrder = new PurchaseOrder();
-        total = new BigDecimal(0);
-        return total;
+    public void deleta(String id) {
+        if (id.length() != 24){
+            throw new PurchaseOrderException("ID incorreto, o ID deve conter 24 caracteres!");
+        }
+        Optional<PurchaseOrder> purchaseOrderOptional = purchaseOrderRepository.findById(id);
+        if (purchaseOrderOptional.isEmpty()) {
+            throw new PurchaseOrderException("Ordem de compra nao existe!!! Por gentileza inserir um ID existente!");
+        }
+            purchaseOrderRepository.deleteById(id);
     }
 }

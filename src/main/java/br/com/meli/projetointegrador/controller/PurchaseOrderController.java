@@ -3,6 +3,7 @@ package br.com.meli.projetointegrador.controller;
 import br.com.meli.projetointegrador.model.dto.ProductDTO;
 import br.com.meli.projetointegrador.model.dto.PurchaseOrderDTO;
 import br.com.meli.projetointegrador.model.service.PurchaseOrderService;
+import org.bson.types.ObjectId;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
@@ -67,16 +68,14 @@ public class PurchaseOrderController {
     }
 
     /**
-     * @param purchaseOrderDTO, ordem de compra;
+     * @param id, ordem de compra;
      * @return uma purchase ordder da alteracao;
      * Requisito 06 - Desenvolvimento individual do integrante Jhony Zuim.
      */
-    @DeleteMapping(value = "/order", produces = "application/json")
-    public ResponseEntity<BigDecimal> delete(@Valid @RequestBody PurchaseOrderDTO purchaseOrderDTO,
-                                             UriComponentsBuilder uriComponentsBuilder) {
-        BigDecimal total = purchaseOrderService.delete(purchaseOrderDTO);
-        URI uri = uriComponentsBuilder.path("/order/1").buildAndExpand(1).toUri();
-        return ResponseEntity.ok().body(total);
+    @DeleteMapping(value = "/order{id}", produces = "application/json")
+    public ResponseEntity<String> deletar(@RequestParam String id) {
+        purchaseOrderService.deleta(id);
+        return ResponseEntity.ok().body("Ordem deletada!!!");
     }
 
 }
