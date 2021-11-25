@@ -1,7 +1,6 @@
 package br.com.meli.projetointegrador.model.service;
 
 import Utils.ConstantsUtil;
-import br.com.meli.projetointegrador.exception.InboundOrderException;
 import br.com.meli.projetointegrador.exception.PersistenceException;
 import br.com.meli.projetointegrador.exception.PurchaseOrderException;
 import br.com.meli.projetointegrador.model.dto.ProductDTO;
@@ -11,7 +10,6 @@ import br.com.meli.projetointegrador.model.entity.Product;
 import br.com.meli.projetointegrador.model.entity.PurchaseOrder;
 import br.com.meli.projetointegrador.model.enums.EOrderStatus;
 import br.com.meli.projetointegrador.model.repository.PurchaseOrderRepository;
-import org.bson.types.ObjectId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataAccessException;
@@ -143,7 +141,7 @@ public class PurchaseOrderService {
      * @param id, recebe o ID de uma purchaseOrder;
      * Nao tem retorno.
      */
-    public void deleta(String id) {
+    public void delete(String id) {
         if (id.length() != 24){
             throw new PurchaseOrderException("ID incorreto, o ID deve conter 24 caracteres!");
         }

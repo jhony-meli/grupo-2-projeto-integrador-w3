@@ -73,8 +73,8 @@ public class PurchaseOrderController {
      * Requisito 06 - Desenvolvimento individual do integrante Jhony Zuim.
      */
     @DeleteMapping(value = "/order", produces = "application/json")
-    public ResponseEntity<String> deletar(@RequestParam String id) {
-        purchaseOrderService.deleta(id);
+    public ResponseEntity<String> delete(@RequestParam String id) {
+        purchaseOrderService.delete(id);
         return ResponseEntity.ok().body("Ordem deletada!!!");
     }
 

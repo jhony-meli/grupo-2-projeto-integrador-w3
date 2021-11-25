@@ -37,7 +37,8 @@ class PurchaseOrderServiceTest {
     private final BuyerService mockBuyerService = mock(BuyerService.class);
     private final BatchStockService mockBatchStockService = mock(BatchStockService.class);
     private final PurchaseOrderService purchaseOrderService = new PurchaseOrderService(
-            mockPurchaseOrderRepository, mockProductService, mockBuyerService, mockBatchStockService);
+            mockPurchaseOrderRepository, mockProductService, mockBuyerService,
+            mockBatchStockService);
 
     @Test
     void productPriceTest(){
@@ -553,4 +554,66 @@ class PurchaseOrderServiceTest {
         assertTrue(menssagemEsperada.contains(Objects.requireNonNull(dataAccessException.getMessage())));
     }
 
+    @Test
+    void deleteTest(){
+        Buyer buyer = new Buyer()
+                .name("lucas")
+                .cpf("22233344411")
+                .build();
+
+        SectionCategory sectionCategory = new SectionCategory()
+                .name(ESectionCategory.FF)
+                .build();
+
+        Product product = new Product()
+                .productId("LE")
+                .productName("leite")
+                .productPrice(new BigDecimal(2))
+                .dueDate(LocalDate.now().plusWeeks(3))
+                .category(sectionCategory)
+                .build();
+
+        PurchaseOrder purchaseOrder = new PurchaseOrder()
+                .id("111111111111111111111111")
+                .date(LocalDate.now())
+                .buyer(buyer)
+                .orderStatus(EOrderStatus.ORDER_CHART)
+                .productList(Collections.singletonList(product))
+                .build();
+
+        when(mockPurchaseOrderRepository.findById(anyString())).thenReturn(Optional.ofNullable(purchaseOrder));
+
+        doNothing().when(mockPurchaseOrderRepository).deleteById(anyString());
+
+        purchaseOrderService.delete("111111111111111111111111");
+
+        verify(mockPurchaseOrderRepository, times(1))
+                .deleteById(anyString());
+    }
+
+    @Test
+    void ExceptionIDIncorretoDeleteTest() {
+        doNothing().when(mockPurchaseOrderRepository).deleteById(anyString());
+
+        PurchaseOrderException purchaseOrderException = assertThrows
+                (PurchaseOrderException.class, () -> purchaseOrderService.delete("11111111111111111111111"));
+
+        String mensagemEsperada = "ID incorreto, o ID deve conter 24 caracteres!";
+        String mensagemRecebida = purchaseOrderException.getMessage();
+
+        assertTrue(mensagemEsperada.contains(mensagemRecebida));
+    }
+
+    @Test
+    void ExceptionIDInexistenteDeleteTest() {
+        doNothing().when(mockPurchaseOrderRepository).deleteById(anyString());
+
+        PurchaseOrderException purchaseOrderException = assertThrows
+                (PurchaseOrderException.class, () -> purchaseOrderService.delete("111111111121111111111111"));
+
+        String mensagemEsperada = "Ordem de compra nao existe!!! Por gentileza inserir um ID existente!";
+        String mensagemRecebida = purchaseOrderException.getMessage();
+
+        assertTrue(mensagemEsperada.contains(mensagemRecebida));
+    }
 }
