@@ -1,14 +1,17 @@
 package br.com.meli.projetointegrador.model.service;
 
 import Utils.ConstantsUtil;
+import br.com.meli.projetointegrador.exception.BuyerException;
 import br.com.meli.projetointegrador.exception.PersistenceException;
 import br.com.meli.projetointegrador.exception.PurchaseOrderException;
 import br.com.meli.projetointegrador.model.dto.ProductDTO;
 import br.com.meli.projetointegrador.model.dto.ProductPurchaseOrderDTO;
 import br.com.meli.projetointegrador.model.dto.PurchaseOrderDTO;
+import br.com.meli.projetointegrador.model.entity.Buyer;
 import br.com.meli.projetointegrador.model.entity.Product;
 import br.com.meli.projetointegrador.model.entity.PurchaseOrder;
 import br.com.meli.projetointegrador.model.enums.EOrderStatus;
+import br.com.meli.projetointegrador.model.repository.BuyerRepository;
 import br.com.meli.projetointegrador.model.repository.PurchaseOrderRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,20 +35,24 @@ import java.util.Optional;
 @Service
 public class PurchaseOrderService {
 
+
     private final PurchaseOrderRepository purchaseOrderRepository;
     private final ProductService productService;
     private final BuyerService buyerService;
     private final BatchStockService batchStockService;
     private BigDecimal total = new BigDecimal(0);
+    private final BuyerRepository buyerRepository;
     private static final Logger logger = LoggerFactory.getLogger(PurchaseOrderService.class);
 
     public PurchaseOrderService(PurchaseOrderRepository purchaseOrderRepository
             , ProductService productService, BuyerService buyerService
-            , BatchStockService batchStockService) {
+            , BatchStockService batchStockService, BuyerRepository buyerRepository) {
         this.purchaseOrderRepository = purchaseOrderRepository;
         this.productService = productService;
         this.buyerService = buyerService;
         this.batchStockService = batchStockService;
+        this.buyerRepository = buyerRepository;
+
     }
 
     /**
@@ -74,9 +81,9 @@ public class PurchaseOrderService {
      * @param purchaseOrderDTO recebe uma purchaseOrder;
      * @return se existente faz o update caso nao exista e salva uma nova.
      */
-    public BigDecimal save(PurchaseOrderDTO purchaseOrderDTO){
+    public BigDecimal save(PurchaseOrderDTO purchaseOrderDTO) {
         PurchaseOrder purchaseOrder = new PurchaseOrder();
-        total =  new BigDecimal(0);
+        total = new BigDecimal(0);
         if (ObjectUtils.isEmpty(purchaseOrderDTO.getId())) {
             final List<Product> productListPost = calculeTotal(purchaseOrderDTO);
             purchaseOrder.productList(productListPost);
@@ -85,13 +92,13 @@ public class PurchaseOrderService {
             purchaseOrder.orderStatus(EOrderStatus.ORDER_CHART);
             try {
                 purchaseOrderRepository.save(purchaseOrder);
-            }catch (DataAccessException e) {
+            } catch (DataAccessException e) {
                 logger.error(ConstantsUtil.PERSISTENCE_ERROR, e);
                 throw new PersistenceException(ConstantsUtil.PERSISTENCE_ERROR);
             }
             purchaseOrderRepository.save(purchaseOrder);
             batchStockService.updateBatchStock(purchaseOrderDTO.getListProductPurchaseOrderDTO(), "");
-        }else {
+        } else {
             final List<Product> productListPut = calculeTotal(purchaseOrderDTO);
             final Optional<PurchaseOrder> purchaseOrderOptional = purchaseOrderRepository.findById(purchaseOrderDTO.getId());
             if (purchaseOrderOptional.isEmpty()) {
@@ -105,7 +112,7 @@ public class PurchaseOrderService {
             purchaseOrder.id(purchaseOrderDTO.getId());
             try {
                 purchaseOrderRepository.save(purchaseOrder);
-            }catch (DataAccessException e) {
+            } catch (DataAccessException e) {
                 logger.error(ConstantsUtil.PERSISTENCE_ERROR, e);
                 throw new PersistenceException(ConstantsUtil.PERSISTENCE_ERROR);
             }
@@ -134,5 +141,29 @@ public class PurchaseOrderService {
             productList.add(product);
         }
         return productList;
+    }
+
+    /**
+     * @param purchaseOrderDTO recebe uma purchaseOrderDTO;
+     * @return adiciona o produto a lista ou retorna a exception.
+     */
+    public BigDecimal purchaseSucess(PurchaseOrderDTO purchaseOrderDTO) {
+        PurchaseOrder purchaseOrder = new PurchaseOrder();
+        final Optional<Buyer> buyer = buyerRepository.findById(purchaseOrderDTO.getBuyerId());
+        total = new BigDecimal(0);
+        if (buyer.isEmpty()) {
+            throw new BuyerException("Id do Comprador Invalido");
+        } else if (ObjectUtils.isEmpty(purchaseOrderDTO.getId())) {
+            final List<Product> productListPost = calculeTotal(purchaseOrderDTO);
+            purchaseOrder.productList(productListPost);
+            purchaseOrder.date(LocalDate.now());
+            purchaseOrder.buyer(buyerService.find(purchaseOrderDTO.getBuyerId()));
+            purchaseOrder.orderStatus(EOrderStatus.PURCHASE_COMPLETE);
+            purchaseOrderRepository.save(purchaseOrder);
+            batchStockService.updateBatchStock(purchaseOrderDTO.getListProductPurchaseOrderDTO(), "");
+        } else {
+            throw new PurchaseOrderException("ordem de compra invalido");
+        }
+        return total;
     }
 }

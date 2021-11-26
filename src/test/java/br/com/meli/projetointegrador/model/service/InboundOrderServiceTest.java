@@ -741,5 +741,4 @@ class InboundOrderServiceTest {
 
         assertTrue(menssagemEsperada.contains(Objects.requireNonNull(dataAccessException.getMessage())));
     }
-
 }

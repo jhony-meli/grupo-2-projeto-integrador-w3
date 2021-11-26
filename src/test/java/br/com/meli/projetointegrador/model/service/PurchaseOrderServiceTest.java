@@ -1,5 +1,6 @@
 package br.com.meli.projetointegrador.model.service;
 
+import br.com.meli.projetointegrador.exception.BuyerException;
 import br.com.meli.projetointegrador.exception.PurchaseOrderException;
 import br.com.meli.projetointegrador.model.dto.OrderStatusDTO;
 import br.com.meli.projetointegrador.model.dto.ProductDTO;
@@ -11,6 +12,7 @@ import br.com.meli.projetointegrador.model.entity.PurchaseOrder;
 import br.com.meli.projetointegrador.model.entity.SectionCategory;
 import br.com.meli.projetointegrador.model.enums.EOrderStatus;
 import br.com.meli.projetointegrador.model.enums.ESectionCategory;
+import br.com.meli.projetointegrador.model.repository.BuyerRepository;
 import br.com.meli.projetointegrador.model.repository.PurchaseOrderRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.dao.DataAccessException;
@@ -35,9 +37,10 @@ class PurchaseOrderServiceTest {
     private final PurchaseOrderRepository mockPurchaseOrderRepository = mock(PurchaseOrderRepository.class);
     private final ProductService mockProductService = mock(ProductService.class);
     private final BuyerService mockBuyerService = mock(BuyerService.class);
+    private final BuyerRepository mockBuyerRepository = mock(BuyerRepository.class);
     private final BatchStockService mockBatchStockService = mock(BatchStockService.class);
     private final PurchaseOrderService purchaseOrderService = new PurchaseOrderService(
-            mockPurchaseOrderRepository, mockProductService, mockBuyerService, mockBatchStockService);
+            mockPurchaseOrderRepository, mockProductService, mockBuyerService, mockBatchStockService, mockBuyerRepository);
 
     @Test
     void productPriceTest(){
@@ -551,6 +554,61 @@ class PurchaseOrderServiceTest {
         String menssagemEsperada = "Erro durante a persistencia no banco!!!";
 
         assertTrue(menssagemEsperada.contains(Objects.requireNonNull(dataAccessException.getMessage())));
+    }
+
+    /**
+     * @test teste unitario do requesito 06
+     * @exception "Id do Comprador Invalido"
+     *
+     */
+
+    @Test
+    void BuyerNotFoundTest(){
+        List<ProductPurchaseOrderDTO> listProductPurchaseOrderDTO = new ArrayList<>();
+        ProductPurchaseOrderDTO productPurchaseOrderDTO1 = new ProductPurchaseOrderDTO()
+                .productId("FR")
+                .quantity(5)
+                .build();
+        ProductPurchaseOrderDTO productPurchaseOrderDTO2 = new ProductPurchaseOrderDTO()
+                .productId("QJ")
+                .quantity(3)
+                .build();
+        listProductPurchaseOrderDTO.add(productPurchaseOrderDTO1);
+        listProductPurchaseOrderDTO.add(productPurchaseOrderDTO2);
+
+        PurchaseOrderDTO purchaseOrderDTO = new PurchaseOrderDTO()
+                .data(LocalDate.now())
+                .buyerId("1")
+                .orderStatus(new OrderStatusDTO().statusCode(EOrderStatus.PURCHASE_COMPLETE))
+                .listProductPurchaseOrderDTO(listProductPurchaseOrderDTO);
+
+        when(mockProductService.find(productPurchaseOrderDTO1.getProductId()))
+                .thenReturn(new Product()
+                        .productId("CA")
+                        .productName("carne")
+                        .productPrice(new BigDecimal(2))
+                        .category(new SectionCategory().name(ESectionCategory.FF))
+                        .dueDate(LocalDate.of(2000, 12, 3)));
+
+        when(mockBuyerService.find(anyString()))
+                .thenReturn(new Buyer()
+                        .name("lucas")
+                        .cpf("22233344411")
+                        .build());
+
+        when(mockPurchaseOrderRepository.save(any(PurchaseOrder.class)))
+                .thenReturn(new PurchaseOrder());
+
+        when(mockBatchStockService.dueDataProduct(any(LocalDate.class)))
+                .thenReturn(true);
+
+        BuyerException buyerException = assertThrows
+                (BuyerException.class,() -> purchaseOrderService.purchaseSucess(purchaseOrderDTO));
+
+        String mensagemEsperada = "Id do Comprador Invalido";
+        String mensagemRecebida = buyerException.getMessage();
+
+        assertTrue(mensagemEsperada.contains(mensagemRecebida));
     }
 
 }

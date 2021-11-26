@@ -66,4 +66,22 @@ public class PurchaseOrderController {
         return post(purchaseOrderDTO, uriComponentsBuilder);
     }
 
+//    @PostMapping (value = "/purchasesucessid")
+//    public ResponseEntity<String> purchaseSucessId (@RequestParam String id) {
+//        purchaseOrderService.purchaseSucessId(id);
+//        return  ResponseEntity.ok().body("Compra Realizada com Sucesso");
+//    }
+
+    /**
+     * @param purchaseOrderDTO,  compra efetuada
+     * @return ResponseEntity.created com valor total e status 201, caso nao exista notifique a situacao.
+     * requisito 6 - endpoint purchaseSucess: Efetue uma compra.
+     */
+    @PostMapping(value = "/purchase", produces = "application/json")
+    public ResponseEntity<BigDecimal> purchaseSucess(@RequestBody PurchaseOrderDTO purchaseOrderDTO,
+                                           UriComponentsBuilder uriComponentsBuilder) {
+        BigDecimal total = purchaseOrderService.purchaseSucess(purchaseOrderDTO);
+        URI uri = uriComponentsBuilder.path("/order/1").buildAndExpand(1).toUri();
+        return ResponseEntity.created(uri).body(total);
+    }
 }

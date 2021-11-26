@@ -295,4 +295,37 @@ class PurchaseOrderControllerTest {
         purchaseOrderRepository.save(purchaseOrder);
     }
 
+    /**
+     * @testController
+     * teste do controller do requisito 06.
+     */
+
+    @Test
+    void purchaseSucessControllerTest() throws Exception {
+        final Optional<Buyer> buyer = buyerRepository.findByCpf("22233344411");
+        ProductPurchaseOrderDTO productPurchaseOrderDTO1 = new ProductPurchaseOrderDTO()
+                .productId("LE")
+                .quantity(5)
+                .build();
+        ProductPurchaseOrderDTO productPurchaseOrderDTO2 = new ProductPurchaseOrderDTO()
+                .productId("QJ")
+                .quantity(3)
+                .build();
+
+        PurchaseOrderDTO purchaseOrderDTO = new PurchaseOrderDTO()
+                .data(LocalDate.now())
+                .buyerId(buyer.orElse(new Buyer()).getId())
+                .orderStatus(new OrderStatusDTO().statusCode(EOrderStatus.PURCHASE_COMPLETE))
+                .listProductPurchaseOrderDTO(Arrays.asList(productPurchaseOrderDTO1,
+                        productPurchaseOrderDTO2));
+
+        MockHttpServletResponse response = mockMvc.perform(post("http://localhost:8080/api/v1/fresh-products/purchase")
+                        .header("Authorization", "Bearer " + tokenTest.getAccessToken())
+                        .contentType("application/json")
+                        .content(objectMapper.writeValueAsString(purchaseOrderDTO)))
+                .andReturn().getResponse();
+
+        assertEquals(HttpStatus.CREATED.value(), response.getStatus());
+    }
+
 }

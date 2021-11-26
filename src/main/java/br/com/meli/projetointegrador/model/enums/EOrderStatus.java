@@ -15,6 +15,9 @@ public enum EOrderStatus {
     ORDER_CHART,
 
     @JsonProperty("in progress")
-    IN_PROGRESS
+    IN_PROGRESS,
+
+    @JsonProperty("purchase complete")
+    PURCHASE_COMPLETE,
 
 }
