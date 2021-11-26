@@ -6,3 +6,4 @@
 <br/>O programa usa como banco de dados o MongoDB<br/>
 <br/>Nos testes/model/repository/SaveDataRepository existe um script de carregamento do banco(linha 126)<br/>
 <br/>Na documentacao existe o arquivo da collection do Postman para enviar as requests, lembrando que e necessario criar um usuario e gerar o token.<br/>
+<br/>A documentacao do swagger se encontra dentro do projeto. Ao iniciar a aplicacao, a mesma fica disponivel no seguinte link: http://localhost:[porta]/swagger-ui.html#/
