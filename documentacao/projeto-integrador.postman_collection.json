@@ -688,5 +688,36 @@
 				]
 			}
 		}
-	]
+	],
+{
+	"name": "R2-E3 ->purchaseorder-sucess",
+	"request": {
+		"method": "POST",
+		"header": [],
+		"body": {
+			"mode": "raw",
+			"raw": " {\n    \"data\": \"22/11/2021\",\n    \"buyerId\": \"619c0641284d1262c1845031\",\n    \"orderStatus\": {\n        \"statusCode\": \"in progress\"\n    },\n    \"products\": [\n        {\n            \"productId\": \"CA1\",\n            \"quantity\": 10\n        },\n        {\n            \"productId\": \"FR1\",\n            \"quantity\": 10\n        }\n    ]\n}",
+			"options": {
+				"raw": {
+					"language": "json"
+				}
+			}
+		},
+		"url": {
+			"raw": "http://localhost:8080/api/v1/fresh-products/order",
+			"protocol": "http",
+			"host": [
+				"localhost"
+			],
+			"port": "8080",
+			"path": [
+				"api",
+				"v1",
+				"fresh-products",
+				"order"
+			]
+		}
+	},
+	"response": []
+},
 }
